@@ -24,6 +24,8 @@ router.get('/', async (req, res) => {
         if(response) {
             console.log(response);
             res.json(response);
+        } else {
+        res.sendStatus(503)
         }
     } catch(err) {
         console.error(err);
