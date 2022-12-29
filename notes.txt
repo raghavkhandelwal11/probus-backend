@@ -1,0 +1,49 @@
+const user = {
+    _id = "76a976c76ff69g987a"
+    fullname: "raghav khandelwal",
+    email: "raghavkhandelwal11@gmail.com",
+    password: "123456",
+    bookings: [{
+        bookingId: 1,
+        travelAgency: "xyz",
+        from: "bikaner",
+        to: "jaipur"
+        bookingdate: 23-12-22,
+        departure: "7AM",
+        arrival: "12PM",
+        seats: [l6, l8, l9],
+        passengers: [{
+            name: "p1",
+            age: 35,
+            gender: "m"
+        }, {
+            name: "p2",
+            age: 32,
+            gender: "m"
+        },
+        {
+            name: "p3",
+            age: 38,
+            gender: "f"
+        }]
+    }]
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
