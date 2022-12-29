@@ -1,5 +1,5 @@
 const express = require("express");
-const {MongoClient} = require("mongodb");
+const { MongoClient } = require("mongodb");
 const bodyparser = require('body-parser');
 const ObjectId = require("mongodb").ObjectId;
 
@@ -21,35 +21,40 @@ run();
 
 
 route.post("/", parser, async (req, res) => {
-    console.log("rr", req.body.seats);
-    if(req.body.seats.length != 0) {
-        console.log("rr", req.body.seats);
-        try{
-            const response = await collection.updateOne(
-                {_id: ObjectId(req.body.busid)},
-                { $push: { booked: { $each: req.body.seats } } }
+
+    try {
+        if (req.body.seats.length != 0) {
+            console.log("rr", req.body.seats);
+            try {
+                const response = await collection.updateOne(
+                    { _id: ObjectId(req.body.busid) },
+                    { $push: { booked: { $each: req.body.seats } } }
                 );
-            if(response.acknowledged == true) {
-                res.send("seats booked")
+                if (response.acknowledged == true) {
+                    res.send("seats booked")
+                }
+            } catch (err) {
+                console.error(err);
+                res.send("error occured here")
             }
-        }catch(err) {
-            console.error(err);
-            res.send("error occured here")
+
+
         }
-        
+    } catch (err) {
+        res.send("error occured here")
     }
 });
 
 
 route.post("/seats", parser, async (req, res) => {
-    try{
-        const response = await collection.findOne({_id: ObjectId(req.body.busid)});
-        if(response) {
+    try {
+        const response = await collection.findOne({ _id: ObjectId(req.body.busid) });
+        if (response) {
             res.json(response);
         } else {
             res.send('error occured')
         }
-    }catch(err) {
+    } catch (err) {
         console.error(err);
         res.send('error occured')
     }
@@ -58,20 +63,25 @@ route.post("/seats", parser, async (req, res) => {
 
 
 route.post('/reset', parser, async (req, res) => {
-    if(Object.keys(req.body).length != 0) {
-        try{
+
+    try {
+        if (Object.keys(req.body).length != 0) {
             const response = await collection.updateOne(
-                {_id: ObjectId(req.body.busid)},
-                {$pull: {booked: req.body.seat}}
-                );
-            if(response.acknowledged == true){
+                { _id: ObjectId(req.body.busid) },
+                { $pull: { booked: req.body.seat } }
+            );
+            if (response.acknowledged == true) {
                 res.send("updated")
             } else {
                 res.send("failed")
             }
-        } catch(err){
-            console.log(err);
+
+        } else {
+            res.send("failed")
         }
+    } catch (err) {
+        console.log(err);
+        res.send("failed");
     }
 });
 

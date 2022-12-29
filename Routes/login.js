@@ -23,60 +23,64 @@ run();
 
 
 router.post("/", parser, async (req, res) => {
-    if(Object.keys(req.body).length != 0) {
-        try {
 
-            const response = await collection.findOne({email: req.body.email});
-            
-            if(response) {
+    try {
+
+        if (Object.keys(req.body).length != 0) {
+
+            const response = await collection.findOne({ email: req.body.email });
+
+            if (response) {
                 console.log(response);
 
                 const result = await bcrypt.compare(req.body.password, response.password);
 
-                if(result) {
+                if (result) {
                     response.password = undefined;
                     const userdata = {
                         email: req.body.email,
                         password: req.body.password
                     }
 
-                    const token = jwt.sign({userdata: userdata}, process.env.SECRET_KEY, {expiresIn: "2d"});
+                    const token = jwt.sign({ userdata: userdata }, process.env.SECRET_KEY, { expiresIn: "2d" });
                     response.jwt = token;
 
-                    res.json(response);                    
+                    res.json(response);
 
                 }
 
             } else {
                 res.send("Incorrect Email Or Password");
             }
-            
-        } catch(err) {
-            console.error(err);
+
+        } else {
             res.sendStatus(403);
         }
-    } else {
+
+    } catch (err) {
+        console.error(err);
         res.sendStatus(403);
     }
+
 });
 
 
 router.post("/authenticate", async (req, res) => {
     try {
         const bearerToken = req.headers['authorization'];
-        if(typeof bearerToken != undefined) {
+        if (typeof bearerToken != undefined) {
             const token = bearerToken.split(" ")[1];
             let userData = {}
-            try{
+            try {
                 userData = jwt.verify(token, process.env.SECRET_KEY);
-            } catch(err) {
+            } catch (err) {
                 res.send("Token Expired")
             }
 
-            if(Object.keys(userData).length != 0) {
+            if (Object.keys(userData).length != 0) {
                 const email = userData.userdata.email;
-                const response1 = await collection.findOne({email: email});
-                if(response1) {
+                const response1 = await collection.findOne({ email: email });
+                if (response1) {
                     response1.password = undefined;
                     response1.jwt = token;
                     console.log(response1);
@@ -85,11 +89,11 @@ router.post("/authenticate", async (req, res) => {
                     res.send("Invalid Token");
                 }
             }
-            
+
         } else {
             res.send("Invalid Token");
         }
-    } catch(err) {
+    } catch (err) {
         console.error(err);
         res.send("Invalid Token");
     }
@@ -97,18 +101,24 @@ router.post("/authenticate", async (req, res) => {
 
 
 router.post("/admin", parser, async (req, res) => {
-    if(Object.keys(req.body).length != 0) {
-        const response = await collection.findOne({_id: ObjectId(req.body.userid)});
-        if(response) {
-            if(response.fullname == "ADMIN") {
-                res.send("access granted");
+
+    try {
+        if (Object.keys(req.body).length != 0) {
+            const response = await collection.findOne({ _id: ObjectId(req.body.userid) });
+            if (response) {
+                if (response.fullname == "ADMIN") {
+                    res.send("access granted");
+                } else {
+                    res.send("access denied");
+                }
             } else {
                 res.send("access denied");
             }
         } else {
             res.send("access denied");
         }
-    } else {
+    } catch (err) {
+        console.error(err);
         res.send("access denied");
     }
 })

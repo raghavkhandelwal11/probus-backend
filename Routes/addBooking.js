@@ -1,9 +1,9 @@
 require("dotenv").config();
 const express = require("express");
 const bodyparser = require("body-parser");
-const {MongoClient} = require("mongodb");
+const { MongoClient } = require("mongodb");
 const ObjectId = require('mongodb').ObjectId;
-const jwt = require("jsonwebtoken"); 
+const jwt = require("jsonwebtoken");
 
 const DB_URL = "mongodb+srv://raghav:rk1212@cluster0.rbzeb6a.mongodb.net/?retryWrites=true&w=majority";
 let collection;
@@ -22,15 +22,19 @@ run();
 
 
 const authenticate = (req, res, next) => {
-    if(Object.keys(req.body).length != 0) {
-        jwt.verify(req.body.jwt, process.env.SECRET_KEY, (err, user) => {
-            if(err) {
-                res.send("token expired");
-                return 
-            }
-            next();
-        })
-    } else {
+    try {
+        if (Object.keys(req.body).length != 0) {
+            jwt.verify(req.body.jwt, process.env.SECRET_KEY, (err, user) => {
+                if (err) {
+                    res.send("token expired");
+                    return
+                }
+                next();
+            })
+        } else {
+            res.send("error occured");
+        }
+    } catch (err) {
         res.send("error occured");
     }
 }
@@ -47,16 +51,17 @@ route.use(parser);
 
 
 route.post("/", authenticate, async (req, res) => {
-    console.log("the body sent was", req.body);
-    if(Object.keys(req.body).length != 0) {
-        try{
+
+
+    try {
+        if (Object.keys(req.body).length != 0) {
             const response = await collection.updateOne(
-                {_id: ObjectId(req.body.userid)},
-                {$push: {bookings: req.body}}
+                { _id: ObjectId(req.body.userid) },
+                { $push: { bookings: req.body } }
             );
-            if(response.acknowledged == true) {
-                const response1 = await collection.findOne({_id: ObjectId(req.body.userid)});
-                if(response1) {
+            if (response.acknowledged == true) {
+                const response1 = await collection.findOne({ _id: ObjectId(req.body.userid) });
+                if (response1) {
                     response1.password = undefined;
                     response1.jwt = req.body.jwt;
                     console.log(response1);
@@ -67,11 +72,15 @@ route.post("/", authenticate, async (req, res) => {
             } else {
                 res.send("error occured");
             }
-        } catch(err) {
-            console.error(err);
-            res.send("error occured");
+        } else {
+            res.send("error occured")
         }
     }
-});
+    catch (err) {
+        console.error(err);
+        res.send("error occured");
+    }
+}
+);
 
 module.exports = route;

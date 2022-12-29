@@ -21,8 +21,9 @@ run();
 
 
 router.post("/", parser, async (req, res) => {
-    if(Object.keys(req.body).length != 0) {
-        try {
+
+    try {
+        if (Object.keys(req.body).length != 0) {
             hashedPassword = await bcrypt.hash(req.body.password, 10);
 
             const user = {
@@ -32,11 +33,11 @@ router.post("/", parser, async (req, res) => {
                 bookings: []
             }
 
-            const response = await collection.findOne({email: req.body.email});
+            const response = await collection.findOne({ email: req.body.email });
 
-            if(!response) {
+            if (!response) {
                 const response1 = await collection.insertOne(user);
-                if(response1.acknowledged == true) {
+                if (response1.acknowledged == true) {
                     console.log("user added");
                     res.send("Registration Successful");
                 }
@@ -44,14 +45,16 @@ router.post("/", parser, async (req, res) => {
                 res.send("User Already Exists");
             }
 
-        } catch(err) {
-            console.error(err);
+        } else {
             res.sendStatus(400);
         }
-    } else {
+
+    } catch (err) {
+        console.error(err);
         res.sendStatus(400);
     }
-})
+
+});
 
 
 module.exports = router;
